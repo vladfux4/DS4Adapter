@@ -64,6 +64,16 @@ public class Hooks implements IXposedHookLoadPackage {
                         intent.setAction("com.vladfux.ds4adapter.action.KEY_EVENT");
                         intent.putExtra("com.vladfux.ds4adapter.extra.KEY_EVENT", event);
                         ((Activity)(param.thisObject)).sendBroadcast(intent);
+
+                        if (event.getKeyCode() == KeyEvent.KEYCODE_BUTTON_MODE) {
+                            XposedBridge.log("KEY_EVENT: " + event.toString());
+                            KeyEvent new_even = new KeyEvent(event.getDownTime(), event.getEventTime(),
+                                    event.getAction(), 3, event.getRepeatCount(),
+                                    event.getMetaState(), event.getDeviceId(), event.getScanCode(),
+                                    event.getFlags(), event.getSource());
+                            param.args[0] = new_even;
+                            XposedBridge.log("Changed to KEY_EVENT: " + new_even.toString());
+                        }
                     }
                 });
     }
