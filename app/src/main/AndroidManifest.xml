@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.vladfux.ds4adapter">
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="PSRemote DS4 adapter service" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+        <service android:enabled="true" android:exported="true" android:name="com.sonymobile.ds4.HidSonyDS4Service">
+            <intent-filter>
+                <action android:name="com.sonymobile.ds4.IHidSonyDS4Service"/>
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
