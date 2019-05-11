@@ -1,5 +1,8 @@
 package com.sonymobile.ds4;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,14 +11,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.input.InputManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+
+import com.vladfux.ds4adapter.R;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static android.bluetooth.BluetoothAdapter.getDefaultAdapter;
+import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
 
 public class HidSonyDS4Service
         extends Service
@@ -427,6 +437,7 @@ public class HidSonyDS4Service
         }
     }
 
+    @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind: " + intent.toString());
 
@@ -438,6 +449,7 @@ public class HidSonyDS4Service
         return null;
     }
 
+    @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
 
@@ -446,15 +458,14 @@ public class HidSonyDS4Service
         super.onCreate();
         this.mAdapter = getDefaultAdapter();
         this.mInputManager = ((InputManager)getSystemService("input"));
-
         ChangeServiceState();
     }
 
+    @Override
     public void onRebind(Intent intent) {
         Log.d(TAG, "onRebind: " + intent.toString());
         super.onRebind(intent);
     }
-
 
     private final BroadcastReceiver mAdapterStateReceiver = new BroadcastReceiver() {
         @Override
@@ -555,7 +566,32 @@ public class HidSonyDS4Service
 
     public void ChangeServiceState() {
         Intent service_start = new Intent(this, HidSonyDS4Service.class);
-        startService(service_start);
+        ContextCompat.startForegroundService(this, service_start );
+
+        // Create the Foreground Service
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? createNotificationChannel(notificationManager) : "";
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setPriority(PRIORITY_MIN)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .build();
+
+        startForeground(101, notification);
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private String createNotificationChannel(NotificationManager notificationManager){
+        String channelId = "com.vladfux4.ds4adapter.notification_channel";
+        String channelName = "DS4 Adapter service";
+        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+        // omitted the LED color
+        channel.setImportance(NotificationManager.IMPORTANCE_NONE);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        notificationManager.createNotificationChannel(channel);
+        return channelId;
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
