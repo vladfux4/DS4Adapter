@@ -574,7 +574,7 @@ public class HidSonyDS4Service
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
         Notification notification = notificationBuilder.setOngoing(true)
                 .setPriority(PRIORITY_MIN)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_launcher_background)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .build();
 
